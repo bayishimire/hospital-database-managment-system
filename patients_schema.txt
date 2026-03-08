@@ -1,0 +1,17 @@
+mysql: [Warning] Using a password on the command line interface can be insecure.
+Field	Type	Null	Key	Default	Extra
+patient_id	int	NO	PRI	NULL	auto_increment
+first_name	varchar(50)	NO		NULL	
+last_name	varchar(50)	NO		NULL	
+date_of_birth	date	YES		NULL	
+gender	enum('Male','Female','Other')	YES		NULL	
+phone	varchar(20)	YES		NULL	
+email	varchar(50)	YES		NULL	
+address	varchar(255)	YES		NULL	
+blood_group	varchar(5)	YES		NULL	
+national_id	varchar(20)	YES	UNI	NULL	
+district	varchar(50)	YES		NULL	
+cell	varchar(50)	YES		NULL	
+parent_name	varchar(100)	YES		NULL	
+is_head_of_family	tinyint(1)	YES		0	
+insurance	varchar(100)	YES		None	

@@ -1,0 +1,8 @@
+mysql: [Warning] Using a password on the command line interface can be insecure.
+Field	Type	Null	Key	Default	Extra
+appointment_id	int	NO	PRI	NULL	auto_increment
+patient_id	int	YES	MUL	NULL	
+doctor_id	int	YES	MUL	NULL	
+appointment_date	datetime	YES		NULL	
+reason	varchar(255)	YES		NULL	
+status	enum('Scheduled','Completed','Cancelled')	YES		NULL	
