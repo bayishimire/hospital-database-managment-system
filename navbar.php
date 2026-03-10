@@ -11,6 +11,11 @@ if ($role == 'SuperAdmin') {
 } elseif ($role == 'Doctor') {
     $clinicBadge = $conn->query("SELECT COUNT(*) FROM patient_cases WHERE status = 'Pending' AND (doctor_id = $rid OR doctor_id = 0)")->fetch_row()[0] ?? 0;
 }
+// Notification for Billing (Pending Payments)
+$billBadge = 0;
+if (in_array($role, ['SuperAdmin', 'Reception', 'Admin', 'Staff'])) {
+    $billBadge = $conn->query("SELECT COUNT(*) FROM patient_cases WHERE status = 'BillingPending'")->fetch_row()[0] ?? 0;
+}
 ?>
 <nav>
     <!-- Primary Dashboard Link -->
@@ -26,7 +31,7 @@ if ($role == 'SuperAdmin') {
     <?php endif; ?>
 
     <!-- Critical Path: Intake & Clinic -->
-    <?php if ($role == 'SuperAdmin' || $role == 'Staff' || $role == 'Service'): ?>
+    <?php if ($role == 'SuperAdmin' || $role == 'Admin' || $role == 'Staff' || $role == 'Reception'): ?>
         <a href="intake_service.php" style="background: rgba(37, 99, 235, 0.05); color: var(--primary); font-weight: 700;">
             <i class="fa-solid fa-clipboard-user"></i> Reception
         </a>
@@ -66,6 +71,10 @@ if ($role == 'SuperAdmin') {
                 <a href="manage_departments.php"><i class="fa-solid fa-hotel"></i> Hospital Depts</a>
             <?php endif; ?>
 
+            <?php if (in_array($role, ['SuperAdmin', 'Admin', 'Staff', 'Reception'])): ?>
+                <a href="manage_doctors.php"><i class="fa-solid fa-user-doctor"></i> Doctor Profiles</a>
+            <?php endif; ?>
+
             <div
                 style="padding: 0.5rem 1rem; font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 0.5rem 0; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9;">
                 Operations
@@ -82,6 +91,10 @@ if ($role == 'SuperAdmin') {
             <a href="billing.php"
                 style="border-top: 1px solid #f1f5f9; margin-top: 5px; padding-top: 10px; font-weight: 700; color: var(--primary);">
                 <i class="fa-solid fa-money-check-dollar"></i> BILLING CENTER
+                <?php if ($billBadge > 0): ?>
+                    <span
+                        style="background: #ef4444; color: white; padding: 2px 7px; border-radius: 50%; font-size: 0.6rem; font-weight: 900;"><?= $billBadge ?></span>
+                <?php endif; ?>
             </a>
         </div>
     </div>

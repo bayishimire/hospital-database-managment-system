@@ -1,0 +1,5 @@
+room_id | int | NO | PRI |  | auto_increment
+room_number | varchar(10) | YES |  |  | 
+type | enum('General','ICU','Private') | YES |  |  | 
+capacity | int | YES |  |  | 
+availability_status | enum('Available','Occupied') | YES |  |  | 

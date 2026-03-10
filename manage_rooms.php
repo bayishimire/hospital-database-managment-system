@@ -1,10 +1,7 @@
-<?php require_once __DIR__ . '/connection.php'; ?>
 <?php
-// RBAC: Only staff, doctor, and SuperAdmin
-if (!in_array($_SESSION['role'], ['SuperAdmin', 'Staff', 'Doctor', 'Service'])) {
-    header("Location: dashboard.php");
-    exit();
-}
+require_once __DIR__ . '/connection.php';
+require_once __DIR__ . '/access_control.php';
+restrict_access(['Staff', 'Doctor', 'Service']);
 
 // ─── CRUD LOGIC HANDLERS ───────────────────────────────────────────────────
 
@@ -14,8 +11,11 @@ if (isset($_GET['delete_room']) && $_SESSION['role'] == 'SuperAdmin') {
     // Safety check: Cannot delete room if it has active occupants
     $check = $conn->query("SELECT COUNT(*) FROM patient_rooms WHERE room_id = $r_id AND discharge_date IS NULL")->fetch_row()[0];
     if ($check == 0) {
-        $conn->query("DELETE FROM rooms WHERE room_id = $r_id");
-        header("Location: manage_rooms.php?msg=deleted");
+        if ($conn->query("DELETE FROM rooms WHERE room_id = $r_id")) {
+            header("Location: manage_rooms.php?msg=deleted");
+        } else {
+            die("Error deleting room: " . $conn->error);
+        }
     } else {
         header("Location: manage_rooms.php?msg=error_occupied");
     }
@@ -33,6 +33,8 @@ if (isset($_POST['update_room']) && $_SESSION['role'] == 'SuperAdmin') {
     $stmt->bind_param("ssii", $num, $typ, $cap, $rid);
     if ($stmt->execute()) {
         header("Location: manage_rooms.php?msg=updated");
+    } else {
+        die("Error updating room: " . $stmt->error);
     }
     exit();
 }
@@ -45,9 +47,15 @@ if (isset($_POST['add_room']) && $_SESSION['role'] == 'SuperAdmin') {
     $status = 'Available';
 
     $stmt = $conn->prepare("INSERT INTO rooms (room_number, type, capacity, availability_status) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("ssis", $num, $typ, $cap, $status);
-    if ($stmt->execute()) {
-        header("Location: manage_rooms.php?msg=added");
+    if ($stmt) {
+        $stmt->bind_param("ssis", $num, $typ, $cap, $status);
+        if ($stmt->execute()) {
+            header("Location: manage_rooms.php?msg=added");
+        } else {
+            die("Error inserting room: " . $stmt->error);
+        }
+    } else {
+        die("Error preparing statement: " . $conn->error);
     }
     exit();
 }
@@ -73,7 +81,8 @@ if (isset($_POST['add_room']) && $_SESSION['role'] == 'SuperAdmin') {
         <?php elseif ($_GET['msg'] == 'updated'): ?>
             <div class='badge badge-success'
                 style='width:100%; padding:1rem; margin-bottom:1.5rem; background:#eff6ff; color:#2563eb; border:1px solid #dbeafe;'>
-                <i class='fa-solid fa-pen-to-square'></i> ROOM DETAILS UPDATED</div>
+                <i class='fa-solid fa-pen-to-square'></i> ROOM DETAILS UPDATED
+            </div>
         <?php elseif ($_GET['msg'] == 'error_occupied'): ?>
             <div class='badge badge-danger' style='width:100%; padding:1rem; margin-bottom:1.5rem;'><i
                     class='fa-solid fa-triangle-exclamation'></i> ERROR: CANNOT DELETE OCCUPIED ROOM</div>
@@ -158,7 +167,8 @@ if (isset($_POST['add_room']) && $_SESSION['role'] == 'SuperAdmin') {
             <section class="card"
                 style="box-shadow: none; border: 2px solid var(--accent); background: #f0fff4; margin-bottom: 0;">
                 <h3 class="card-title" style="font-size: 1.1rem;"><i class="fa-solid fa-user-plus"></i> Admit:
-                    <?= htmlspecialchars($patient['first_name'] . " " . $patient['last_name']) ?></h3>
+                    <?= htmlspecialchars($patient['first_name'] . " " . $patient['last_name']) ?>
+                </h3>
                 <form method="POST">
                     <input type="hidden" name="patient_id" value="<?= $patient['patient_id'] ?>">
                     <div style="margin-bottom: 1rem;">

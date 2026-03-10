@@ -1,11 +1,7 @@
 <?php require_once __DIR__ . '/connection.php'; ?>
 <?php
-// RBAC: SuperAdmin only for user management
-if ($_SESSION['role'] != 'SuperAdmin') {
-    header("Location: dashboard.php");
-    exit();
-}
-$isSuperAdmin = true; // Since we passed the above check
+require_once __DIR__ . '/access_control.php';
+restrict_access([]); // Empty array means only SuperAdmin (who has bypass) can enter
 ?>
 <?php include 'header.php'; ?>
 
@@ -47,7 +43,7 @@ $isSuperAdmin = true; // Since we passed the above check
                     <label
                         style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">Privilege
                         Designation</label>
-                    <select name="role" id="roleSelector" required onchange="toggleDoctorLink(this.value)"
+                    <select name="role" id="roleSelector" required
                         style="width: 100%; padding: 0.875rem; border-radius: 10px; border: 1px solid var(--border); background: white;">
                         <option value="SuperAdmin">SuperAdmin (Full Control Plane)</option>
                         <option value="Doctor">Doctor (Clinical & Health Records)</option>
@@ -56,27 +52,7 @@ $isSuperAdmin = true; // Since we passed the above check
                         <option value="Patient">Patient Identity (Limited Access)</option>
                     </select>
                 </div>
-                <!-- Linked Doctor Profile (Conditional) -->
-                <div id="doctorLinkField" style="margin-bottom: 2rem; display: none;">
-                    <label
-                        style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">Link
-                        to Specialist Profile</label>
-                    <select name="related_id"
-                        style="width: 100%; padding: 0.875rem; border-radius: 10px; border: 1px solid var(--border); background: white;">
-                        <option value="0">-- Select Doctor Profile --</option>
-                        <?php
-                        $docRes = $conn->query("SELECT doctor_id, first_name, last_name, specialization FROM doctors");
-                        while ($d = $docRes->fetch_assoc()) {
-                            echo "<option value='{$d['doctor_id']}'>Dr. {$d['first_name']} {$d['last_name']} ({$d['specialization']})</option>";
-                        }
-                        ?>
-                    </select>
-                </div>
-                <script>
-                    function toggleDoctorLink(role) {
-                        document.getElementById('doctorLinkField').style.display = (role === 'Doctor') ? 'block' : 'none';
-                    }
-                </script>
+
                 <div style="margin-bottom: 2rem;">
                     <label
                         style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">Profile

@@ -9,6 +9,14 @@ $role = $_SESSION['role'];
 $user_id = $_SESSION['user_id'];
 $related_id = $_SESSION['related_id'] ?? 0;
 
+// HANDLE LAB COMPLETION (Return to Doctor)
+if (isset($_GET['complete_lab']) && in_array($role, ['SuperAdmin', 'Staff', 'Reception', 'Admin'])) {
+    $cid = (int) $_GET['complete_lab'];
+    $conn->query("UPDATE patient_cases SET status = 'Pending' WHERE case_id = $cid");
+    header("Location: dashboard.php?lab_sent_back=1");
+    exit();
+}
+
 // ─── DATA AGGREGATION ────────────────────────────────────────────────────────
 
 // All roles get these base counts
@@ -16,6 +24,7 @@ $totalPatients = $conn->query("SELECT COUNT(*) FROM patients")->fetch_row()[0] ?
 $totalDoctors = $conn->query("SELECT COUNT(*) FROM doctors")->fetch_row()[0] ?? 0;
 $availRooms = $conn->query("SELECT COUNT(*) FROM rooms WHERE availability_status = 'Available'")->fetch_row()[0] ?? 0;
 $pendingQueue = $conn->query("SELECT COUNT(*) FROM patient_cases WHERE status = 'Pending'")->fetch_row()[0] ?? 0;
+$labQueue = $conn->query("SELECT COUNT(*) FROM patient_cases WHERE status = 'LabPending'")->fetch_row()[0] ?? 0;
 
 // Role-specific data
 if ($role == 'SuperAdmin') {
@@ -266,6 +275,54 @@ if ($role == 'SuperAdmin') {
         border-color: var(--border);
         transform: translateX(5px);
     }
+
+    /* CONSOLE BOXES FOR BILLING DASHBOARD WIDGET */
+    .console-box {
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 0;
+        overflow: hidden;
+        transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        text-decoration: none !important;
+        color: inherit !important;
+        margin-bottom: 1rem;
+    }
+
+    .console-box:hover {
+        transform: translateY(-5px);
+        border-color: #2563eb;
+        box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.1);
+    }
+
+    .console-header {
+        padding: 1.2rem;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .console-body {
+        padding: 1.2rem;
+        flex-grow: 1;
+    }
+
+    .console-footer {
+        padding: 0.8rem 1.2rem;
+        background: #2563eb;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+    }
 </style>
 
 <div class="dashboard-container">
@@ -462,12 +519,12 @@ if ($role == 'SuperAdmin') {
                 <div class="stat-val"><?= $totalPatients ?></div>
                 <div class="stat-label">Global Patient Registry</div>
             </div>
-            <div class="stat-card">
-                <i class="fa-solid fa-user-doctor stat-icon-bg"></i>
-                <div class="stat-icon-main" style="background:#f5f3ff; color:#7c3aed;"><i class="fa-solid fa-user-md"></i>
+            <div class="stat-card" style="border-bottom: 4px solid #7c3aed;">
+                <i class="fa-solid fa-microscope stat-icon-bg"></i>
+                <div class="stat-icon-main" style="background:#f5f3ff; color:#7c3aed;"><i class="fa-solid fa-vials"></i>
                 </div>
-                <div class="stat-val"><?= $totalDoctors ?></div>
-                <div class="stat-label">Specialists on Roster</div>
+                <div class="stat-val" style="color:#7c3aed;"><?= $labQueue ?></div>
+                <div class="stat-label">In Laboratory (Pending Tests)</div>
             </div>
         <?php endif; ?>
 
@@ -568,32 +625,90 @@ if ($role == 'SuperAdmin') {
                 </div>
 
             <?php else: // Staff / Service Pipeline ?>
-                <h2 class="feature-title"><i class="fa-solid fa-network-wired" style="color:var(--primary)"></i> Operations
-                    Referral Pipeline</h2>
-                <div class="table-container">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Patient Registry</th>
-                                <th>Assigned Specialist</th>
-                                <th>Insurance</th>
-                                <th>Pipe Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <!-- Column 1: Clinical & Lab Pipeline -->
+                    <section>
+                        <h2 class="feature-title"><i class="fa-solid fa-microscope" style="color:var(--primary)"></i>
+                            Clinical & Lab Pipeline</h2>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Patient Registry</th>
+                                        <th>Assigned To</th>
+                                        <th>Diagnostic Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $fish = $conn->query("SELECT pc.*, p.first_name, p.last_name, p.insurance, d.first_name as dfname, d.last_name as dlname FROM patient_cases pc JOIN patients p ON pc.patient_id = p.patient_id LEFT JOIN doctors d ON pc.doctor_id = d.doctor_id WHERE pc.status IN ('Pending', 'LabPending') ORDER BY pc.created_at DESC LIMIT 5");
+                                    if ($fish && $fish->num_rows > 0) {
+                                        while ($row = $fish->fetch_assoc()) {
+                                            $statusLabel = ($row['status'] == 'LabPending') ? "<span class='badge' style='background:#f5f3ff; color:#7c3aed;'>LAB PENDING</span>" : "<span class='badge badge-danger'>CLINIC PENDING</span>";
+                                            $docName = ($row['dfname'] ? "Dr. " . $row['dfname'] : '<span class="text-muted">TBD</span>');
+                                            $action = ($row['status'] == 'LabPending') ? "<a href='?complete_lab={$row['case_id']}' class='btn' style='padding:4px 10px; font-size:0.65rem; background:#10b981; color:white; border:none;'><i class='fa-solid fa-flask'></i> COMPLETE LAB</a>" : "<span class='text-muted' style='font-size:0.7rem;'>Doctor Treatment...</span>";
+                                            echo "<tr>
+                                                <td><strong>{$row['first_name']} {$row['last_name']}</strong></td>
+                                                <td>$docName</td>
+                                                <td>$statusLabel</td>
+                                                <td style='text-align:right;'>$action</td>
+                                            </tr>";
+                                        }
+                                    } else {
+                                        echo "<tr><td colspan='3' align='center' style='padding:20px;' class='text-muted'>No active medical referrals.</td></tr>";
+                                    }
+                                    ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Column 2: Financial Settlement (The "Console Boxes") -->
+                    <section>
+                        <h2 class="feature-title"><i class="fa-solid fa-headset" style="color:#2563eb"></i> Settlement
+                            Console</h2>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
                             <?php
-                            $fish = $conn->query("SELECT pc.*, p.first_name, p.last_name, p.insurance, d.first_name as dfname, d.last_name as dlname FROM patient_cases pc JOIN patients p ON pc.patient_id = p.patient_id LEFT JOIN doctors d ON pc.doctor_id = d.doctor_id WHERE pc.status = 'Pending' LIMIT 8");
-                            while ($row = $fish->fetch_assoc()) {
-                                echo "<tr>
-                                    <td><strong>{$row['first_name']} {$row['last_name']}</strong></td>
-                                    <td>" . ($row['dfname'] ? "<span style='color:var(--primary); font-weight:700;'>Dr. " . $row['dfname'] . "</span>" : '<span class="text-muted">Awaiting Assign...</span>') . "</td>
-                                    <td><span class='badge badge-success'>{$row['insurance']}</span></td>
-                                    <td><span class='badge badge-danger' style='background:#fff1f2; color:#e11d48; border:1px solid #ffe4e6;'>URGENT INTAKE</span></td>
-                                </tr>";
-                            }
-                            ?>
-                        </tbody>
-                    </table>
+                            $billingCases = $conn->query("SELECT pc.*, p.first_name, p.last_name, p.insurance, mr.treatment, d.first_name as dfname 
+                                                         FROM patient_cases pc 
+                                                         JOIN patients p ON pc.patient_id = p.patient_id 
+                                                         LEFT JOIN medicalrecords mr ON p.patient_id = mr.patient_id AND mr.record_date >= pc.created_at
+                                                         LEFT JOIN doctors d ON mr.doctor_id = d.doctor_id
+                                                         WHERE pc.status = 'BillingPending' 
+                                                         ORDER BY pc.created_at DESC LIMIT 3");
+                            if ($billingCases && $billingCases->num_rows > 0):
+                                while ($b = $billingCases->fetch_assoc()): ?>
+                                    <a href="billing.php?patient_id=<?= $b['patient_id'] ?>" class="console-box">
+                                        <div class="console-header">
+                                            <strong
+                                                style="font-size: 0.95rem;"><?= htmlspecialchars($b['first_name'] . ' ' . $b['last_name']) ?></strong>
+                                            <span
+                                                style="font-size: 0.6rem; background: #eff6ff; padding: 4px 8px; border-radius: 12px; font-weight: 800; color: #1e40af;">
+                                                BY DR. <?= strtoupper($b['dfname'] ?? 'SYS') ?>
+                                            </span>
+                                        </div>
+                                        <div class="console-body" style="padding: 1rem;">
+                                            <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 5px;">
+                                                <i class="fa-solid fa-id-card"></i> INS:
+                                                <strong><?= htmlspecialchars($b['insurance']) ?></strong>
+                                            </div>
+                                            <div style="font-size: 0.75rem; color: #475569; font-style: italic;">
+                                                <?= htmlspecialchars(substr($b['treatment'] ?? 'Medication Pending...', 0, 45)) ?>...
+                                            </div>
+                                        </div>
+                                        <div class="console-footer" style="padding: 0.6rem;">
+                                            <i class="fa-solid fa-calculator"></i> CALC BILL
+                                        </div>
+                                    </a>
+                                <?php endwhile; else: ?>
+                                <div
+                                    style="text-align: center; padding: 2rem; border: 2px dashed #e2e8f0; border-radius: 20px; color: #94a3b8;">
+                                    <i class="fa-solid fa-check-circle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                                    <p style="font-size: 0.8rem; font-weight: 600;">No pending payments.</p>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </section>
                 </div>
             <?php endif; ?>
         </div>

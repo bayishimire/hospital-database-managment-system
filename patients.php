@@ -1,10 +1,6 @@
-<?php require_once __DIR__ . '/connection.php'; ?>
-<?php
-// RBAC: Only Staff, Service, Doctor and SuperAdmin can access the registry
-if (!in_array($_SESSION['role'], ['SuperAdmin', 'Staff', 'Service', 'Doctor'])) {
-    header("Location: dashboard.php");
-    exit();
-}
+<?php require_once __DIR__ . '/connection.php';
+require_once __DIR__ . '/access_control.php';
+restrict_access(['Staff', 'Service', 'Doctor', 'Admin']);
 ?>
 <?php include 'header.php'; ?>
 

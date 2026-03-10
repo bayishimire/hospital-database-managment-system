@@ -1,10 +1,7 @@
 <?php require_once __DIR__ . '/connection.php'; ?>
 <?php
-// RBAC: SuperAdmin only for departments
-if ($_SESSION['role'] != 'SuperAdmin') {
-    header("Location: dashboard.php");
-    exit();
-}
+require_once __DIR__ . '/access_control.php';
+restrict_access([]); // Restricted to SuperAdmin only
 ?>
 <?php include 'header.php'; ?>
 
