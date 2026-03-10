@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/connection.php';
 require_once __DIR__ . '/access_control.php';
-restrict_access(['Admin', 'Staff', 'Reception']);
+restrict_access(['Admin']);
 
 // ─── CRUD LOGIC ─────────────────────────────────────────────────────────────
 if (isset($_GET['delete'])) {

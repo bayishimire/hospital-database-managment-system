@@ -1,4 +1,5 @@
 <?php
+global $conn;
 if (!isset($_SESSION['user_id']))
     return;
 $role = $_SESSION['role'];
@@ -71,7 +72,7 @@ if (in_array($role, ['SuperAdmin', 'Reception', 'Admin', 'Staff'])) {
                 <a href="manage_departments.php"><i class="fa-solid fa-hotel"></i> Hospital Depts</a>
             <?php endif; ?>
 
-            <?php if (in_array($role, ['SuperAdmin', 'Admin', 'Staff', 'Reception'])): ?>
+            <?php if (in_array($role, ['SuperAdmin', 'Admin'])): ?>
                 <a href="manage_doctors.php"><i class="fa-solid fa-user-doctor"></i> Doctor Profiles</a>
             <?php endif; ?>
 
@@ -88,6 +89,7 @@ if (in_array($role, ['SuperAdmin', 'Reception', 'Admin', 'Staff'])) {
                 <a href="manage_rooms.php"><i class="fa-solid fa-bed"></i> Rooms & Beds</a>
             <?php endif; ?>
 
+            <?php if (in_array($role, ['SuperAdmin', 'Admin', 'Staff', 'Reception'])): ?>
             <a href="billing.php"
                 style="border-top: 1px solid #f1f5f9; margin-top: 5px; padding-top: 10px; font-weight: 700; color: var(--primary);">
                 <i class="fa-solid fa-money-check-dollar"></i> BILLING CENTER
@@ -96,10 +98,11 @@ if (in_array($role, ['SuperAdmin', 'Reception', 'Admin', 'Staff'])) {
                         style="background: #ef4444; color: white; padding: 2px 7px; border-radius: 50%; font-size: 0.6rem; font-weight: 900;"><?= $billBadge ?></span>
                 <?php endif; ?>
             </a>
+            <?php endif; ?>
         </div>
     </div>
 
     <a href="logout.php" style="margin-left: auto; color: #ef4444;">
         <i class="fa-solid fa-power-off"></i>
     </a>
-</nav>
+</nav>

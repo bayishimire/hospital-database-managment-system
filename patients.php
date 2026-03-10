@@ -1,6 +1,6 @@
 <?php require_once __DIR__ . '/connection.php';
 require_once __DIR__ . '/access_control.php';
-restrict_access(['Staff', 'Service', 'Doctor', 'Admin']);
+restrict_access(['Staff', 'Service', 'Admin']);
 ?>
 <?php include 'header.php'; ?>
 

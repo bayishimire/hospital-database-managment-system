@@ -1,6 +1,6 @@
 <?php require_once __DIR__ . '/connection.php';
 require_once __DIR__ . '/access_control.php';
-restrict_access(['Staff', 'Reception', 'Admin', 'Doctor']);
+restrict_access(['Staff', 'Reception', 'Admin']);
 ?>
 <?php
 // INITIALIZE ALL SHARED VARIABLES

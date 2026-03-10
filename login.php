@@ -111,4 +111,4 @@ include 'header.php';
 <?php
 // Include footer (this closes the container and HTML tags)
 include 'footer.php';
-?>
+?>footer.php'; ?>
