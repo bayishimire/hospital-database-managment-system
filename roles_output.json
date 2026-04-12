@@ -1,0 +1,37 @@
+[
+    {
+        "username": "admin",
+        "password": "admin123",
+        "role": "ADMIN"
+    },
+    {
+        "username": "recep1",
+        "password": "recep123",
+        "role": "RECEPTION"
+    },
+    {
+        "username": "doc1",
+        "password": "doc123",
+        "role": "DOCTOR"
+    },
+    {
+        "username": "l",
+        "password": "123",
+        "role": "LAB"
+    },
+    {
+        "username": "cash1",
+        "password": "cash123",
+        "role": "CASHIER"
+    },
+    {
+        "username": "service",
+        "password": "service",
+        "role": "Service"
+    },
+    {
+        "username": "testuser_1775975104",
+        "password": "password",
+        "role": "SuperAdmin"
+    }
+]

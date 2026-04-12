@@ -258,7 +258,7 @@ if ($slipID) {
     </div>
 
     <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
-        <?php if (in_array($_SESSION['role'], ['SuperAdmin', 'Staff', 'Service', 'Doctor'])): ?>
+        <?php if (in_array($_SESSION['role'], ['SuperAdmin', 'ADMIN', 'RECEPTION', 'Staff', 'Service', 'Doctor'])): ?>
             <!-- Generate Bill Section -->
             <section class="card" style="box-shadow: none; border: 1px solid var(--border); margin-bottom: 0;">
                 <h3 class="card-title" style="font-size: 1.1rem;"><i class="fa-solid fa-plus-circle"></i> Service Settlement

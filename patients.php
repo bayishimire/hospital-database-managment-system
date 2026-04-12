@@ -1,7 +1,7 @@
 <?php require_once __DIR__ . '/connection.php'; ?>
 <?php
-// RBAC: Only Staff, Service, Doctor and SuperAdmin can access the registry
-if (!in_array($_SESSION['role'], ['SuperAdmin', 'Staff', 'Service', 'Doctor'])) {
+// RBAC: Only Admin, Reception, Staff, Service, Doctor and SuperAdmin can access the registry
+if (!in_array($_SESSION['role'], ['SuperAdmin', 'ADMIN', 'RECEPTION', 'Staff', 'Service', 'Doctor'])) {
     header("Location: dashboard.php");
     exit();
 }

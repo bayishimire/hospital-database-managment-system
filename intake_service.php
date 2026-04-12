@@ -1,5 +1,5 @@
 <?php require_once __DIR__ . '/connection.php';
-if (!in_array($_SESSION['role'], ['SuperAdmin', 'Staff', 'Service'])) {
+if (!in_array($_SESSION['role'], ['SuperAdmin', 'ADMIN', 'RECEPTION', 'Staff', 'Service'])) {
     header("Location: dashboard.php");
     exit();
 }

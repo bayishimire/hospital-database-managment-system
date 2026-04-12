@@ -8,7 +8,7 @@ $rid = $_SESSION['related_id'] ?? 0;
 $clinicBadge = 0;
 if ($role == 'SuperAdmin') {
     $clinicBadge = $conn->query("SELECT COUNT(*) FROM patient_cases WHERE status = 'Pending'")->fetch_row()[0] ?? 0;
-} elseif ($role == 'Doctor') {
+} elseif ($role == 'Doctor' ) {
     $clinicBadge = $conn->query("SELECT COUNT(*) FROM patient_cases WHERE status = 'Pending' AND (doctor_id = $rid OR doctor_id = 0)")->fetch_row()[0] ?? 0;
 }
 ?>
@@ -64,6 +64,7 @@ if ($role == 'SuperAdmin') {
                 <a href="manage_users.php"><i class="fa-solid fa-user-shield"></i> Access Control</a>
                 <a href="manage_staff.php"><i class="fa-solid fa-users-gear"></i> Staff Mgmt</a>
                 <a href="manage_departments.php"><i class="fa-solid fa-hotel"></i> Hospital Depts</a>
+                <a href="admin_settings.php"><i class="fa-solid fa-gears"></i> System Settings</a>
             <?php endif; ?>
 
             <div

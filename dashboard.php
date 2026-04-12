@@ -266,6 +266,107 @@ if ($role == 'SuperAdmin') {
         border-color: var(--border);
         transform: translateX(5px);
     }
+
+    /* PREMIUM ADMIN & RECEPTION STYLES */
+    .admin-welcome-card {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: white;
+        padding: 3.5rem;
+        border-radius: 35px;
+        margin-bottom: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        animation: welcomeFadeIn 0.8s ease-out;
+    }
+
+    @keyframes welcomeFadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .admin-welcome-card::after {
+        content: '\f1ad';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        right: -40px;
+        bottom: -40px;
+        font-size: 18rem;
+        opacity: 0.03;
+        transform: rotate(-15deg);
+        pointer-events: none;
+    }
+
+    .admin-feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3.5rem;
+    }
+
+    .admin-feature-card {
+        background: white;
+        padding: 2.25rem;
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+    .admin-feature-card:hover {
+        transform: translateY(-10px);
+        border-color: var(--primary);
+        box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.1), 0 10px 10px -5px rgba(37, 99, 235, 0.04);
+    }
+
+    .admin-feature-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 14px;
+        background: #f8fafc;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        margin-bottom: 1.5rem;
+        transition: 0.3s ease;
+    }
+
+    .admin-feature-card:hover .admin-feature-icon {
+        background: var(--primary);
+        color: white;
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .admin-feature-title {
+        font-weight: 800;
+        font-size: 1.15rem;
+        margin-bottom: 0.75rem;
+        color: var(--text-main);
+    }
+
+    .admin-feature-desc {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        font-weight: 500;
+        line-height: 1.6;
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
 </style>
 
 <div class="dashboard-container">
@@ -362,6 +463,36 @@ if ($role == 'SuperAdmin') {
                 <div class="stat-label">Pending Referral Cases</div>
             </div>
 
+        <?php elseif ($role == 'ADMIN' || $role == 'RECEPTION'): ?>
+            <!-- ADMIN & RECEPTION View: Control Room Clinical Stats -->
+            <div class="stat-card">
+                <i class="fa-solid fa-clipboard-user stat-icon-bg"></i>
+                <a href="intake_service.php" class="shortcut-btn" style="color:#2563eb" title="Start Intake"><i class="fa-solid fa-plus"></i></a>
+                <div class="stat-icon-main" style="background:#eff6ff; color:#2563eb;"><i class="fa-solid fa-id-card"></i></div>
+                <div class="stat-val"><?= $pendingQueue ?></div>
+                <div class="stat-label">Patients Awaiting Intake</div>
+            </div>
+            <div class="stat-card">
+                <i class="fa-solid fa-bed stat-icon-bg"></i>
+                <a href="manage_rooms.php" class="shortcut-btn" title="Room Control"><i class="fa-solid fa-door-open"></i></a>
+                <div class="stat-icon-main" style="background:#ecfdf5; color:#10b981;"><i class="fa-solid fa-door-open"></i></div>
+                <div class="stat-val"><?= $availRooms ?></div>
+                <div class="stat-label">Available Care Stations</div>
+            </div>
+            <div class="stat-card">
+                <i class="fa-solid fa-users stat-icon-bg"></i>
+                <a href="patients.php" class="shortcut-btn" title="Patient Registry"><i class="fa-solid fa-chevron-right"></i></a>
+                <div class="stat-icon-main" style="background:#f8fafc; color:var(--text-main);"><i class="fa-solid fa-hospital-user"></i></div>
+                <div class="stat-val"><?= $totalPatients ?></div>
+                <div class="stat-label">Global Patient Registry</div>
+            </div>
+            <div class="stat-card">
+                <i class="fa-solid fa-user-doctor stat-icon-bg"></i>
+                <div class="stat-icon-main" style="background:#f5f3ff; color:#7c3aed;"><i class="fa-solid fa-user-md"></i></div>
+                <div class="stat-val"><?= $totalDoctors ?></div>
+                <div class="stat-label">Specialists on Roster</div>
+            </div>
+
         <?php elseif ($role == 'Doctor'): ?>
             <!-- Doctor View: My Clinic & Patients -->
             <div class="stat-card" style="border-bottom: 4px solid #f97316;">
@@ -434,7 +565,7 @@ if ($role == 'SuperAdmin') {
                 <div class="stat-label">System Node Connectivity</div>
             </div>
 
-        <?php else: // Staff / Service / Reception ?>
+        <?php else: // Staff / Service / Reception Fallback ?>
             <div class="stat-card" style="border-bottom: 4px solid #2563eb;">
                 <i class="fa-solid fa-clipboard-user stat-icon-bg"></i>
                 <a href="intake_service.php" class="shortcut-btn" style="color:#2563eb" title="Start Intake"><i
@@ -478,7 +609,76 @@ if ($role == 'SuperAdmin') {
 
         <!-- MAIN PANEL: TAILORED CONTENT -->
         <div class="feature-card">
-            <?php if ($role == 'SuperAdmin'): ?>
+            <?php if ($role == 'ADMIN' || $role == 'RECEPTION'): ?>
+                <div class="admin-welcome-card">
+                    <h1 style="font-size: 2.5rem; font-weight: 950; margin-bottom: 1.25rem; letter-spacing: -0.05em;">Welcome to Your Control Room</h1>
+                    <p style="font-size: 1.15rem; opacity: 0.9; line-height: 1.7; font-weight: 500; max-width: 750px; color: rgba(255,255,255,0.9);">
+                        A comprehensive hospital management solution designed for real-time operations, staff oversight, and patient care integrity.
+                    </p>
+                </div>
+
+                <div class="admin-feature-grid">
+                    <a href="admin_dashboard.php" class="admin-feature-card">
+                        <div class="admin-feature-icon"><i class="fa-solid fa-chart-line"></i></div>
+                        <h3 class="admin-feature-title">Live Dashboard</h3>
+                        <p class="admin-feature-desc">View real-time clinical statistics, system health metrics, and inventory stock alerts.</p>
+                    </a>
+                    <a href="patients.php" class="admin-feature-card">
+                        <div class="admin-feature-icon" style="color: #06b6d4;"><i class="fa-solid fa-hospital-user"></i></div>
+                        <h3 class="admin-feature-title">Patient Registry</h3>
+                        <p class="admin-feature-desc">Manage admissions, discharge protocols, and digital historical healthcare records.</p>
+                    </a>
+                    <a href="intake_service.php" class="admin-feature-card">
+                        <div class="admin-feature-icon" style="color: #ef4444;"><i class="fa-solid fa-clipboard-check"></i></div>
+                        <h3 class="admin-feature-title">Patient Intake</h3>
+                        <p class="admin-feature-desc">Receive arriving patients, assign them to specialists, and register their visit status.</p>
+                    </a>
+                    <a href="billing.php" class="admin-feature-card">
+                        <div class="admin-feature-icon" style="color: #f59e0b;"><i class="fa-solid fa-money-check-dollar"></i></div>
+                        <h3 class="admin-feature-title">Financial Desk</h3>
+                        <p class="admin-feature-desc">Generate premium invoices, analyze revenue streams, and monitor global payment status.</p>
+                    </a>
+                </div>
+
+                <div class="admin-table-header">
+                    <h2 class="feature-title" style="margin-bottom:0;"><i class="fa-solid fa-network-wired" style="color:var(--primary)"></i> Operations Referral Pipeline</h2>
+                    <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted);"><i class="fa-solid fa-clock-rotate-left"></i> Real-Time Updates</span>
+                </div>
+                
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Patient Registry</th>
+                                <th>Assigned Specialist</th>
+                                <th>Insurance</th>
+                                <th>Pipe Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $fish = $conn->query("SELECT pc.*, p.first_name, p.last_name, p.insurance, d.first_name as dfname, d.last_name as dlname FROM patient_cases pc JOIN patients p ON pc.patient_id = p.patient_id LEFT JOIN doctors d ON pc.doctor_id = d.doctor_id WHERE pc.status = 'Pending' LIMIT 8");
+                            while ($row = $fish->fetch_assoc()):
+                                ?>
+                                <tr>
+                                    <td>
+                                        <div style="display:flex; align-items:center; gap:10px;">
+                                            <div style="width:10px; height:10px; border-radius:50%; background:#ef4444;"></div>
+                                            <strong><?= $row['first_name'] ?> <?= $row['last_name'] ?></strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <?= $row['dfname'] ? "<span style='color:var(--primary); font-weight:700;'><i class='fa-solid fa-user-md'></i> Dr. " . $row['dfname'] . "</span>" : '<span class="text-muted" style="font-style:italic;">Awaiting Assign...</span>' ?>
+                                    </td>
+                                    <td><span class='badge badge-success' style="font-weight:700;"><?= $row['insurance'] ?></span></td>
+                                    <td><span class='status-badge' style='background:#fff1f2; color:#e11d48; border:1px solid #ffe4e6;'>URGENT INTAKE</span></td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+            <?php elseif ($role == 'SuperAdmin'): ?>
                 <h2 class="feature-title"><i class="fa-solid fa-chart-area" style="color:var(--primary)"></i> System
                     Performance Analytics</h2>
                 <div style="margin-bottom:30px;">
@@ -602,7 +802,7 @@ if ($role == 'SuperAdmin') {
         <div class="feature-card">
             <h2 class="feature-title"><i class="fa-solid fa-bolt" style="color:#f59e0b"></i> Control Actions</h2>
             <div style="display:flex; flex-direction:column; gap:12px;">
-                <?php if ($role == 'SuperAdmin' || $role == 'Staff' || $role == 'Service'): ?>
+                <?php if ($role == 'SuperAdmin' || $role == 'ADMIN' || $role == 'RECEPTION' || $role == 'Staff' || $role == 'Service'): ?>
                     <a href="intake_service.php" class="btn btn-primary"
                         style="justify-content:center; padding:15px; border-radius:14px; font-weight:700;"><i
                             class="fa-solid fa-plus-circle"></i> New Patient Intake</a>

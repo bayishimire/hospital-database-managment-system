@@ -346,6 +346,11 @@ for ($i = 6; $i >= 0; $i--) {
                     <?= $pendingCases ?> In-Flow
                 </div>
             </a>
+            <a href="admin_settings.php" class="matrix-card">
+                <div class="matrix-icon" style="color: #64748b;"><i class="fa-solid fa-gears"></i></div>
+                <div class="matrix-title">System Settings</div>
+                <div class="matrix-count">Configure Global</div>
+            </a>
         </div>
     </div>
 
